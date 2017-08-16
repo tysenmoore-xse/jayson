@@ -1,3 +1,46 @@
+
+---------
+
+# Changes on Fork:
+
+- When using the middleware interface the service method handlers have no way to identify the originating Express path.  So if you have Express configured to use this middleware with different versions of the same handler it is not possible to differentiate the routes.  For example:  Express routes: "/v1/api" and "/v2/api".  The change on this fork will now pass the original request object (HTTP, not just JSON-RPC).  The service handler turns into the following (as an example):
+
+```
+    echo: jayson.Method( function(args, done, req) {
+            console.info("baseUrl:", req.baseUrl);
+
+            // Now you can change handling diffrerent version from the same handler based on the middleware path
+
+            done(null, args);
+        },
+        {
+            collect: true
+        })
+```
+
+# Future Changes
+
+- Need to modify the other transports (tcp,tls,http,https) to pass some initial meta data that will go to the service method (the same as new change above).  This way when you start the transport you can have different versions on different ports. For example, [maybe]:
+
+```
+options.meta = {baseUrl: "/v1/sdk"};
+server.tcp(options).listen(options, function() {
+    resolve(conn);
+});
+
+options.meta = {baseUrl: "/v2/sdk"};
+server.tcp(options).listen(options, function() {
+    resolve(conn);
+});
+```
+
+Now the same handler can be used for all transports (including the original forked change).
+
+NOTE: This is just an idea, may change.
+
+
+---------
+
 # Jayson
 
 Jayson is a [JSON-RPC 2.0][jsonrpc-spec] and [1.0][jsonrpc1-spec] compliant server and client written in JavaScript for [node.js][node.js] that aims to be as simple as possible to use.
