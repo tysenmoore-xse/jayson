@@ -18,25 +18,20 @@
         })
 ```
 
-# Future Changes
-
-- Need to modify the other transports (tcp,tls,http,https) to pass some initial meta data that will go to the service method (the same as new change above).  This way when you start the transport you can have different versions on different ports. For example, [maybe]:
+- When using tcp or tls the request passed into the service method will be the original options.  To mock the middleware version handling you can have separate versions of API's on TCP, TLS on different sockets by adding the same baseUrl to the options.  For example,
 
 ```
-options.meta = {baseUrl: "/v1/sdk"};
-server.tcp(options).listen(options, function() {
-    resolve(conn);
-});
-
-options.meta = {baseUrl: "/v2/sdk"};
-server.tcp(options).listen(options, function() {
-    resolve(conn);
-});
+"listeners" : [ { "protocol":     "tcp",
+                  "host":         "localhost",
+                  "port":         51501,
+                  "backlog":      128,
+                  "baseUrl":      "/v1/api" },
+                { "protocol":     "tcp",
+                  "host":         "localhost",
+                  "port":         51502,
+                  "backlog":      128,
+                  "baseUrl":      "/v2/api" } ],
 ```
-
-Now the same handler can be used for all transports (including the original forked change).
-
-NOTE: This is just an idea, may change.
 
 
 ---------
